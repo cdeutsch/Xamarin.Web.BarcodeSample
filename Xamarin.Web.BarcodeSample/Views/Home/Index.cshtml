@@ -1,0 +1,51 @@
+﻿@model Xamarin.Web.BarcodeSample.Models.PromoModel
+@{
+    ViewBag.Title = "Index";
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { @class = "form-signin" })) {
+    <h3>Scan Your Promo Code</h3>
+
+    <table class="form-group">
+        <tr>
+            <td>
+                @Html.TextBoxFor(mm => mm.PromoCode, new { placeholder = "Promo code", autofocus = "", @class = "form-control" })
+            </td>
+            @if (Request.UserAgent.Contains("XamarinBarcodeSampleApp"))
+            {
+                <td>
+                    <button id="scanBarcode" class="btn btn-info btn-block" type="submit">Scan</button>
+                </td>
+            }
+        </tr>
+    </table>
+    
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+}
+
+@section scripts {
+    @if (Request.UserAgent.Contains("XamarinBarcodeSampleApp"))
+    {
+        <script type="text/javascript" src="~/scripts/mt.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                // listen for scan finished event triggered from native code.
+                Mt.App.addEventListener('scanComplete', function (data) {
+                    if (data && data.code) {
+                        if (confirm('Use the code ' + data.code + '?')) {
+                            $('#PromoCode').val(data.code);
+                        }
+                    }
+                });
+
+                $('#scanBarcode').on('click', function (e) {
+                    e.preventDefault();
+
+                    // fire event in native code.
+                    Mt.App.fireEvent('scanBarcode', {});
+                });
+
+            });
+        </script>
+    }
+}
